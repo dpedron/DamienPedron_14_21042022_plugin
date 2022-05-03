@@ -1,0 +1,35 @@
+.optgroup {
+  font-weight: bold;
+  padding: 5px;
+}
+
+.option {
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.option:hover {
+  color: white;
+  background: #007fff;
+  border: 1px solid #003eff;
+}
+
+.button {
+  display: block;
+  border: 1px solid #c5c5c5;
+  padding: 6px 16px;
+  background: #f6f6f6;
+  border-radius: 3px; /* Need to remove bottom borders when open */
+  cursor: pointer;
+}
+
+.list {
+  margin: 0;
+  list-style-type: none;
+  border: 1px solid #c5c5c5;
+  padding-left: 0;
+}
+
+.label {
+  margin: 16px 0 10px 0;
+}
