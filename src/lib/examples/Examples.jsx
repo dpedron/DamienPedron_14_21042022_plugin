@@ -17,7 +17,16 @@ export default function Examples() {
     <div style={styles.wrapper}>
       <div style={styles.div}>
         <SelectMenu id="state" label="States">
-          <select id="state">
+          <select size="5" id="state">
+            {states.map((state, i) => (
+              <option key={state + i}>{state.name}</option>
+            ))}
+          </select>
+        </SelectMenu>
+      </div>
+      <div style={styles.div}>
+        <SelectMenu id="state2" label="States2">
+          <select id="state2">
             {states.map((state, i) => (
               <option key={state + i}>{state.name}</option>
             ))}

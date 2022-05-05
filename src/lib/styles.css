@@ -8,7 +8,9 @@
   cursor: pointer;
 }
 
-.option:hover {
+.option:hover,
+.option:focus,
+.selected {
   color: white;
   background: #007fff;
   border: 1px solid #003eff;
@@ -28,6 +30,8 @@
   list-style-type: none;
   border: 1px solid #c5c5c5;
   padding-left: 0;
+  max-height: 420px;
+  overflow-y: auto;
 }
 
 .label {

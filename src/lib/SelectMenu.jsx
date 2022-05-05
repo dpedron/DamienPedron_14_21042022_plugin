@@ -13,14 +13,14 @@ export default class SelectMenu extends React.Component {
 
   changeSelect() {
     const select = document.getElementById(this.props.id);
-    select.style.display = 'none'; // Hide initial select
+    /* select.style.display = 'none'; */ // Hide initial select
     this.setState({
       selectHide: true, // Set selectHide to true to display the custom select
     });
   }
 
   render() {
-    const id = this.props.id;
+    const selectId = this.props.id;
     const label = this.props.label;
 
     const getOptions = this.props.children.props.children; // Get all select options insert as children in SelectMenu component
@@ -28,7 +28,7 @@ export default class SelectMenu extends React.Component {
     getOptions.forEach((option) => {
       const optgroup = option.type === 'optgroup'; // Check if it's an optgroup
       options.push(
-        // Add to options array optgroup and option
+        // Add to options array : optgroup and option
         optgroup
           ? {
               name: option.props.label,
@@ -44,11 +44,13 @@ export default class SelectMenu extends React.Component {
 
     return (
       <>
-        <label className="label" htmlFor={`${id}-button`}>
+        <label className="label" htmlFor={`${selectId}-button`}>
           {label}
         </label>
         {this.props.children}
-        {this.state.selectHide && <SelectCover options={options} id={id} />}
+        {this.state.selectHide && (
+          <SelectCover options={options} selectId={selectId} />
+        )}
       </>
     );
   }
