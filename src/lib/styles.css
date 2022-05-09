@@ -6,6 +6,8 @@
 .option {
   padding: 5px 10px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
 }
 
 .option:hover,
@@ -16,13 +18,19 @@
   border: 1px solid #003eff;
 }
 
-.button {
-  display: block;
+.select-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   border: 1px solid #c5c5c5;
   padding: 6px 16px;
   background: #f6f6f6;
   border-radius: 3px; /* Need to remove bottom borders when open */
   cursor: pointer;
+}
+
+.chevron {
+  height: 15px;
 }
 
 .list {
@@ -36,4 +44,14 @@
 
 .label {
   margin: 16px 0 10px 0;
+}
+
+.option-pic {
+  pointer-events: none;
+  width: 16px;
+  height: 16px;
+}
+
+.option-text {
+  padding: 0 16px 0 32px;
 }

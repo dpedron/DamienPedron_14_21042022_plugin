@@ -22,8 +22,7 @@ export default class SelectMenu extends React.Component {
   render() {
     const selectId = this.props.id;
     const label = this.props.label;
-
-    const getOptions = this.props.children.props.children; // Get all select options insert as children in SelectMenu component
+    const getOptions = this.props.children; // Get all select options insert as children in SelectMenu component
     let options = []; // Init options
     getOptions.forEach((option) => {
       const optgroup = option.type === 'optgroup'; // Check if it's an optgroup
@@ -38,6 +37,7 @@ export default class SelectMenu extends React.Component {
           : {
               name: option.props.children,
               type: option.type,
+              imgsrc: option.props.imgsrc,
             }
       );
     });
@@ -47,7 +47,14 @@ export default class SelectMenu extends React.Component {
         <label className="label" htmlFor={`${selectId}-button`}>
           {label}
         </label>
-        {this.props.children}
+        <select
+          id={selectId}
+          name={selectId}
+          size={this.props.size}
+          disabled={this.props.disabled}
+        >
+          {this.props.children}
+        </select>
         {this.state.selectHide && (
           <SelectCover options={options} selectId={selectId} />
         )}
