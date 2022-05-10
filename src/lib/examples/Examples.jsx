@@ -43,7 +43,7 @@ export default function Examples() {
         <SelectMenu id="files" label="Files">
           <optgroup label="Scripts">
             <option>jQuery.js</option>
-            <option>ui.jQuery.js</option>
+            <option imgsrc={testImg}>ui.jQuery.js</option>
           </optgroup>
           <optgroup label="Other files">
             <option>Some unknown file</option>

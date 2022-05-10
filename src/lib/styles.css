@@ -54,4 +54,15 @@
 
 .option-text {
   padding: 0 16px 0 32px;
+  pointer-events: none;
+}
+
+.disabled {
+  pointer-events: none;
+  color: lightgrey;
+}
+
+.chevron.disabled {
+  filter: brightness(0) saturate(100%) invert(96%) sepia(0%) saturate(173%)
+    hue-rotate(189deg) brightness(94%) contrast(80%);
 }

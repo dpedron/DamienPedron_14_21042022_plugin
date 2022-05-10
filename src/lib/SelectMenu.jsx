@@ -38,6 +38,7 @@ export default class SelectMenu extends React.Component {
               name: option.props.children,
               type: option.type,
               imgsrc: option.props.imgsrc,
+              disabled: option.props.disabled,
             }
       );
     });
