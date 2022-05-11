@@ -19,14 +19,14 @@ export default function Examples() {
       <div style={styles.div}>
         <SelectMenu id="state" label="States" size={5}>
           {states.map((state, i) => (
-            <option key={state + i}>{state.name}</option>
+            <option key={state.name + i}>{state.name}</option>
           ))}
         </SelectMenu>
       </div>
       <div style={styles.div}>
         <SelectMenu id="state2" label="States2">
           {states.map((state, i) => (
-            <option key={state + i}>{state.name}</option>
+            <option key={state.name + i}>{state.name}</option>
           ))}
         </SelectMenu>
       </div>

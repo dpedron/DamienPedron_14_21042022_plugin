@@ -24,8 +24,10 @@ export default class SelectMenu extends React.Component {
     const label = this.props.label;
     const getOptions = this.props.children; // Get all select options insert as children in SelectMenu component
     let options = []; // Init options
+    let optPosition = 0;
     getOptions.forEach((option) => {
       const optgroup = option.type === 'optgroup'; // Check if it's an optgroup
+      !optgroup && optPosition++;
       options.push(
         // Add to options array : optgroup and option
         optgroup
@@ -39,6 +41,7 @@ export default class SelectMenu extends React.Component {
               type: option.type,
               imgsrc: option.props.imgsrc,
               disabled: option.props.disabled,
+              optionPosition: optPosition,
             }
       );
     });

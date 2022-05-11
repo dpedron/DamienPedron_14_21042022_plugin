@@ -188,7 +188,7 @@ export default function SelectCover({ options, selectId }) {
     <>
       {!hasASize && ( // Hide the button when a size has been specified for the select
         <div
-          className={`select-button ${disabled && 'disabled'}`}
+          className={`select-button ${disabled ? 'disabled' : ''}`}
           id={`${selectId}-button`}
           onKeyDown={(e) => {
             keyboadInteraction(e);
@@ -200,14 +200,14 @@ export default function SelectCover({ options, selectId }) {
           <img
             alt=""
             src={chevron}
-            className={`chevron ${disabled && 'disabled'}`}
+            className={`chevron ${disabled ? 'disabled' : ''}`}
           />
         </div>
       )}
       {opened && (
         <ul
           id={`${selectId}-list`}
-          className={`list ${disabled && 'disabled'}`}
+          className={`list ${disabled ? 'disabled' : ''}`}
           style={{
             height:
               option && hasASize && `${selectSize * option.clientHeight}px`,
@@ -229,7 +229,7 @@ export default function SelectCover({ options, selectId }) {
                       key={option.options.props.children}
                       id={`${selectId}-${option.options.props.children}`}
                       className={`option ${
-                        option.props.disabled && 'disabled'
+                        option.props.disabled ? 'disabled' : ''
                       }`}
                       onClick={(e) => selectOption(e)}
                       tabIndex={option.props.disabled ? '-1' : '0'}
@@ -257,7 +257,7 @@ export default function SelectCover({ options, selectId }) {
                         key={option.props.children}
                         id={`${selectId}-${option.props.children}`}
                         className={`option ${
-                          option.props.disabled && 'disabled'
+                          option.props.disabled ? 'disabled' : ''
                         }`}
                         onClick={(e) => selectOption(e)}
                         tabIndex={option.props.disabled ? '-1' : '0'}
@@ -275,6 +275,7 @@ export default function SelectCover({ options, selectId }) {
                         <span className="option-text">
                           {option.props.children}
                         </span>
+                        {console.log(options)}
                       </li>
                     );
                   })}
@@ -283,7 +284,7 @@ export default function SelectCover({ options, selectId }) {
               <li
                 key={option.name}
                 id={`${selectId}-${option.name}`}
-                className={`option ${option.disabled && 'disabled'}`}
+                className={`option ${option.disabled ? 'disabled' : ''}`}
                 onClick={(e) => selectOption(e)}
                 tabIndex={option.disabled || hasASize ? '-1' : '0'}
                 onKeyDown={(e) => {
