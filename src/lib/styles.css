@@ -25,7 +25,7 @@
   border: 1px solid #c5c5c5;
   padding: 6px 16px;
   background: #f6f6f6;
-  border-radius: 3px; /* Need to remove bottom borders when open */
+  border-radius: 3px;
   cursor: pointer;
 }
 
@@ -34,12 +34,17 @@
 }
 
 .list {
+  position: relative;
   margin: 0;
   list-style-type: none;
   border: 1px solid #c5c5c5;
   padding-left: 0;
   max-height: 420px;
   overflow-y: auto;
+}
+
+.no-size {
+  z-index: 10;
 }
 
 .label {
@@ -65,4 +70,13 @@
 .chevron.disabled {
   filter: brightness(0) saturate(100%) invert(96%) sepia(0%) saturate(173%)
     hue-rotate(189deg) brightness(94%) contrast(80%);
+}
+
+.handle-click {
+  position: absolute;
+  width: 100%;
+  height: 100vh;
+  top: 0;
+  left: 0;
+  z-index: 9;
 }

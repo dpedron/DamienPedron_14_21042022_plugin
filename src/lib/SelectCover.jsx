@@ -6,11 +6,10 @@ export default function SelectCover({ options, selectId }) {
   const [opened, setOpened] = useState(false); // Open/close select menu
   const [currentList, setCurrentList] = useState([]); // Current list
   const [optionPosition, setOptionPosition] = useState(0); // Option position in the list
-  const [clickCount, setClickCount] = useState(0);
 
   /* Original select */
   const select = document.getElementById(selectId);
-  const selectValue = document.getElementById(selectId).value;
+  const selectValue = document.getElementById(selectId).value || '';
   const selectSize = document.getElementById(selectId).size;
 
   /* Select cover */
@@ -51,16 +50,24 @@ export default function SelectCover({ options, selectId }) {
   }
 
   function updateValue() {
-    if (buttonTitle && select[optionPosition]) {
-      buttonTitle.innerText = select[optionPosition].innerText;
+    if (options[optionPosition] === undefined) {
+      return;
+    }
+    if (buttonTitle && options[optionPosition]) {
+      buttonTitle.innerText = options[optionPosition].name;
       select.value = buttonTitle.innerText;
     }
+  }
+
+  function disableAllOptions() {
+    [...currentList].forEach((option) => option.classList.add('disabled'));
   }
 
   useEffect(() => {
     getOptions();
     focusOnOpen();
     updateValue();
+    hasASize && disabled && disableAllOptions();
   });
 
   /* Handles the selection of an option */
@@ -70,7 +77,6 @@ export default function SelectCover({ options, selectId }) {
     } else {
       select.value = e.target.innerText; // Change select value
       setOpened(false);
-      setClickCount(0);
       setOptionPosition(
         [...currentList].findIndex(
           (option) => e.target.innerText === option.innerText
@@ -87,21 +93,12 @@ export default function SelectCover({ options, selectId }) {
   }
 
   /* Handles when the menu should be closed */
-  document.onclick = () => {
-    if (!opened && !hasASize) {
-      setClickCount(0);
-    }
-    if (opened && !hasASize) {
-      if (clickCount === 1) {
-        setOpened(!opened);
-        setClickCount(0);
-      } else {
-        setClickCount(1);
-      }
-    }
+  document.onclick = (e) => {
+    const handleClick = document.querySelector('.handle-click');
+    handleClick === e.target && setOpened(false);
   };
 
-  function keyboadInteraction(e) {
+  function keyboardInteraction(e) {
     if (e.code === 'Tab') {
       return;
     }
@@ -116,7 +113,6 @@ export default function SelectCover({ options, selectId }) {
       ) {
         button.focus();
         setOpened(false);
-        setClickCount(0);
       }
       if (currentList.length > 0) {
         /* Select an option */
@@ -145,15 +141,6 @@ export default function SelectCover({ options, selectId }) {
         ) {
           setOptionPosition(optionPosition + 1);
         }
-
-        /* Select first */
-        if (e.code === 'Home' || e.code === 'PageUp') {
-          setOptionPosition(0);
-        }
-        /* Select last */
-        if (e.code === 'End' || e.code === 'PageDown') {
-          setOptionPosition(currentList.length - 1);
-        }
       }
     }
 
@@ -181,6 +168,13 @@ export default function SelectCover({ options, selectId }) {
           setOptionPosition(optionPosition + 1);
         }
       }
+    } /* Select first */
+    if (e.code === 'Home' || e.code === 'PageUp') {
+      setOptionPosition(0);
+    }
+    /* Select last */
+    if (e.code === 'End' || e.code === 'PageDown') {
+      setOptionPosition(currentList.length - 1);
     }
   }
 
@@ -191,7 +185,7 @@ export default function SelectCover({ options, selectId }) {
           className={`select-button ${disabled ? 'disabled' : ''}`}
           id={`${selectId}-button`}
           onKeyDown={(e) => {
-            keyboadInteraction(e);
+            keyboardInteraction(e);
           }}
           onClick={() => setOpened(!opened)}
           tabIndex={disabled ? '-1' : '0'}
@@ -205,64 +199,38 @@ export default function SelectCover({ options, selectId }) {
         </div>
       )}
       {opened && (
-        <ul
-          id={`${selectId}-list`}
-          className={`list ${disabled ? 'disabled' : ''}`}
-          style={{
-            height:
-              option && hasASize && `${selectSize * option.clientHeight}px`,
-          }}
-          tabIndex={disabled || !hasASize ? '-1' : '0'}
-          onKeyDown={(e) => {
-            keyboadInteraction(e);
-          }}
-        >
-          {options.map((option, i) =>
-            option.type === 'optgroup' ? ( // Handle optgroup
-              <React.Fragment key={`${option.name}${i}`}>
-                <li key={`${option.name}`} className="optgroup">
-                  {option.name}
-                </li>
-                {option.options !== undefined &&
-                  option.options.type === 'option' && ( // Only one option in optgroup
-                    <li
-                      key={option.options.props.children}
-                      id={`${selectId}-${option.options.props.children}`}
-                      className={`option ${
-                        option.props.disabled ? 'disabled' : ''
-                      }`}
-                      onClick={(e) => selectOption(e)}
-                      tabIndex={option.props.disabled ? '-1' : '0'}
-                      onKeyDown={(e) => {
-                        keyboadInteraction(e);
-                      }}
-                    >
-                      {option.props.imgsrc && (
-                        <img
-                          alt=""
-                          className="option-pic"
-                          src={option.props.imgsrc}
-                        />
-                      )}
-                      <span className="option-text">
-                        {option.options.props.children}
-                      </span>
-                    </li>
-                  )}
-                {option.options && // More than one option in optgroup
-                  option.options.length > 1 &&
-                  option.options.map((option) => {
-                    return (
+        <>
+          {!hasASize && <div className="handle-click"></div>}
+          <ul
+            id={`${selectId}-list`}
+            className={`list ${!hasASize ? 'no-size' : ''}`}
+            style={{
+              height:
+                option && hasASize && `${selectSize * option.clientHeight}px`,
+            }}
+            tabIndex={disabled || !hasASize ? '-1' : '0'}
+            onKeyDown={(e) => {
+              keyboardInteraction(e);
+            }}
+          >
+            {options.map((option, i) =>
+              option.type === 'optgroup' ? ( // Handle optgroup
+                <React.Fragment key={`${option.name}${i}`}>
+                  <li key={`${option.name}`} className="optgroup">
+                    {option.name}
+                  </li>
+                  {option.options !== undefined &&
+                    option.options.type === 'option' && ( // Only one option in optgroup
                       <li
-                        key={option.props.children}
-                        id={`${selectId}-${option.props.children}`}
+                        key={option.options.props.children}
+                        id={`${selectId}-${option.options.props.children}`}
                         className={`option ${
                           option.props.disabled ? 'disabled' : ''
                         }`}
                         onClick={(e) => selectOption(e)}
                         tabIndex={option.props.disabled ? '-1' : '0'}
                         onKeyDown={(e) => {
-                          keyboadInteraction(e);
+                          keyboardInteraction(e);
                         }}
                       >
                         {option.props.imgsrc && (
@@ -273,32 +241,60 @@ export default function SelectCover({ options, selectId }) {
                           />
                         )}
                         <span className="option-text">
-                          {option.props.children}
+                          {option.options.props.children}
                         </span>
-                        {console.log(options)}
                       </li>
-                    );
-                  })}
-              </React.Fragment>
-            ) : (
-              <li
-                key={option.name}
-                id={`${selectId}-${option.name}`}
-                className={`option ${option.disabled ? 'disabled' : ''}`}
-                onClick={(e) => selectOption(e)}
-                tabIndex={option.disabled || hasASize ? '-1' : '0'}
-                onKeyDown={(e) => {
-                  keyboadInteraction(e);
-                }}
-              >
-                {option.imgsrc && (
-                  <img alt="" className="option-pic" src={option.imgsrc} />
-                )}
-                <span className="option-text">{option.name}</span>
-              </li>
-            )
-          )}
-        </ul>
+                    )}
+                  {option.options && // More than one option in optgroup
+                    option.options.length > 1 &&
+                    option.options.map((option) => {
+                      return (
+                        <li
+                          key={option.props.children}
+                          id={`${selectId}-${option.props.children}`}
+                          className={`option ${
+                            option.props.disabled ? 'disabled' : ''
+                          }`}
+                          onClick={(e) => selectOption(e)}
+                          tabIndex={option.props.disabled ? '-1' : '0'}
+                          onKeyDown={(e) => {
+                            keyboardInteraction(e);
+                          }}
+                        >
+                          {option.props.imgsrc && (
+                            <img
+                              alt=""
+                              className="option-pic"
+                              src={option.props.imgsrc}
+                            />
+                          )}
+                          <span className="option-text">
+                            {option.props.children}
+                          </span>
+                        </li>
+                      );
+                    })}
+                </React.Fragment>
+              ) : (
+                <li
+                  key={option.name}
+                  id={`${selectId}-${option.name}`}
+                  className={`option ${option.disabled ? 'disabled' : ''}`}
+                  onClick={(e) => selectOption(e)}
+                  tabIndex={option.disabled || hasASize ? '-1' : '0'}
+                  onKeyDown={(e) => {
+                    keyboardInteraction(e);
+                  }}
+                >
+                  {option.imgsrc && (
+                    <img alt="" className="option-pic" src={option.imgsrc} />
+                  )}
+                  <span className="option-text">{option.name}</span>
+                </li>
+              )
+            )}
+          </ul>
+        </>
       )}
     </>
   );
