@@ -32,11 +32,11 @@ export default function Examples() {
       </div>
       <div style={styles.div}>
         <SelectMenu selectId="speed" label="Speed">
-          <option disabled imgsrc={testImg}>
+          <option imgsrc={testImg} disabled>
             Slower
           </option>
-          <option>Slow</option>
-          <option disabled>Medium</option>
+          <option disabled>Slow</option>
+          <option>Medium</option>
           <option disabled>Fast</option>
           <option>Faster</option>
         </SelectMenu>
@@ -49,7 +49,10 @@ export default function Examples() {
           </optgroup>
           <optgroup label="Other files">
             <option disabled>Some unknown file</option>
-            <option>Some other file with a very long option text</option>
+            <option disabled>
+              Some other file with a very long option text
+            </option>
+            <option>Some other le with a very long option text</option>
           </optgroup>
         </SelectMenu>
       </div>

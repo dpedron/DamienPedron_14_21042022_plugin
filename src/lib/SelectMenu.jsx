@@ -20,7 +20,7 @@ export default function SelectMenu({
 
   function changeSelect() {
     const select = document.getElementById(selectId);
-    select.style.display = 'none'; // Hide initial select
+    /* select.style.display = 'none'; */ // Hide initial select
     setSelectHide(true); // Set selectHide to true to display the custom select
   }
 

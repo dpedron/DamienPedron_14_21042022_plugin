@@ -4,7 +4,6 @@ import chevron from './angle-down-solid.svg';
 export default function SelectCover({ options, selectId }) {
   /* State management */
   const [opened, setOpened] = useState(false); // Open/close select menu
-  const [currentList, setCurrentList] = useState([]); // Current list
   const [optionPosition, setOptionPosition] = useState(0); // Option position in the list
 
   /* Original select */
@@ -28,89 +27,78 @@ export default function SelectCover({ options, selectId }) {
   /* Handles the focus when the menu is open */
   function focusOnOpen() {
     /* When options were added to the dom and select has no size */
-
-    if (hasASize) {
-      return;
-    }
     if (
       list &&
+      !hasASize &&
       optionPosition !== -1 &&
       list.children[optionPosition] !== undefined
     ) {
-      const actualPosition = [...list.children].findIndex(
-        (option) => option.innerText === buttonTitle.innerText
-      );
-      list.children[actualPosition].focus(); // Put the focus on the option actually selected (first option on first opening)
-      setOptionPosition(actualPosition);
-      setCurrentList(list.children); // Set the opened list as the current list
+      list.children[optionPosition].focus(); // Put the focus on the option actually selected (first option on first opening)
+      list.children[optionPosition].tabIndex === -1 &&
+        setOptionPosition(optionPosition + 1); // If the first option is not focusable (like optgroup), try the next child and so on
     }
-  }
-
-  function getOptions() {
-    const currentList = document.getElementById(`${selectId}-list`);
-    const currentButton = document.getElementById(`${selectId}-button`);
-    opened
-      ? setCurrentList(currentList.children)
-      : setCurrentList(currentButton.previousElementSibling.children);
   }
 
   function updateValue() {
-    if (options[optionPosition] === undefined) {
-      return;
-    }
-    if (
-      buttonTitle &&
-      options[optionPosition] &&
-      !options[optionPosition].disabled &&
-      options[optionPosition].type !== 'optgroup'
-    ) {
+    if (buttonTitle && options[optionPosition]) {
+      if (
+        options[optionPosition].disabled ||
+        options[optionPosition].type === 'optgroup'
+      ) {
+        buttonTitle.innerText = '';
+        select.value = buttonTitle.innerText;
+        return;
+      }
       buttonTitle.innerText = options[optionPosition].name;
       select.value = buttonTitle.innerText;
     }
   }
 
   function disableAllOptions() {
-    [...currentList].forEach((option) => option.classList.add('disabled'));
+    if (list) {
+      [...list.children].forEach((option) => option.classList.add('disabled'));
+    }
   }
 
-  function initialPosition() {
+  useEffect(() => {
+    focusOnOpen();
+    updateValue();
+    hasASize && disabled && disableAllOptions();
+  });
+
+  useEffect(() => {
     if (options[optionPosition] === undefined) {
       return;
     }
     if (
       options[optionPosition].type === 'optgroup' ||
-      options[optionPosition].disabled
+      options[optionPosition].disabled === true
     ) {
       setOptionPosition(optionPosition + 1);
     }
-  }
-
-  useEffect(() => {
-    initialPosition();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    updateValue();
-    getOptions();
-    focusOnOpen();
-    hasASize && disabled && disableAllOptions();
-  });
-
   /* Handles the selection of an option */
   function selectOption(e) {
-    setOpened(false);
-    setOptionPosition(
-      [...currentList].findIndex(
-        (option) => e.target.innerText === option.innerText
-      )
-    );
-    e.target.classList.add('selected'); // Display "selected" style
-    [...e.target.parentElement.children].forEach(
-      (option) =>
-        !(option.className.includes('selected') && option.id === e.target.id) &&
-        option.classList.remove('selected') // Remove "selected" style of the option that is no longer selected
-    );
+    if (hasASize && disabled) {
+      e.preventDefault();
+    } else {
+      select.value = e.target.innerText; // Change select value
+      setOpened(false);
+      setOptionPosition(
+        [...list.children].findIndex(
+          (option) => e.target.innerText === option.innerText
+        )
+      );
+      e.target.classList.add('selected'); // Display "selected" style
+      [...e.target.parentElement.children].forEach(
+        (option) =>
+          !(
+            option.className.includes('selected') && option.id === e.target.id
+          ) && option.classList.remove('selected') // Remove "selected" style of the option that is no longer selected
+      );
+    }
   }
 
   /* Handles when the menu should be closed */
@@ -120,68 +108,12 @@ export default function SelectCover({ options, selectId }) {
   };
 
   function keyboardInteraction(e) {
-    if (e.target.classList.contains('option') && e.code === 'Tab') {
-      selectOption(e);
-      return;
-    }
-    if ((button || hasASize) && e.code === 'Tab') {
+    const prev = optionPosition - 1;
+    const next = optionPosition + 1;
+    if (e.code === 'Tab') {
       return;
     }
     e.preventDefault();
-    /* Select previous option */
-    if (
-      optionPosition >= 1 &&
-      (e.code === 'ArrowUp' || e.code === 'ArrowLeft') &&
-      !e.altKey
-    ) {
-      let newPosition = optionPosition;
-      do {
-        newPosition > 1 && newPosition--;
-      } while (
-        (options[newPosition - 1].type === 'optgroup' ||
-          options[newPosition - 1].disabled) && // When the previous element is an optgroup ...
-        newPosition > 1 // and the current option is at least the third ...
-      );
-      (options[newPosition].type === 'optgroup' ||
-        options[newPosition].disabled) &&
-        newPosition--;
-      setOptionPosition(newPosition);
-      if (list && hasASize) {
-        list.children[newPosition].focus();
-        select.value = document.activeElement.innerText;
-      }
-    }
-    /* Select next option */
-    if (
-      optionPosition < options.length - 1 &&
-      (e.code === 'ArrowDown' || e.code === 'ArrowRight') &&
-      !e.altKey
-    ) {
-      let newPosition = optionPosition;
-      if (
-        (options[newPosition + 1].type === 'optgroup' ||
-          options[newPosition + 1].disabled) &&
-        newPosition < options.length - 2
-      ) {
-        do {
-          newPosition++;
-        } while (
-          (options[newPosition].type === 'optgroup' ||
-            options[newPosition].disabled) && // When the previous element is an optgroup ...
-          newPosition < options.length - 2 // and the current option is at least the third ...
-        );
-      }
-      newPosition++;
-      if (list && hasASize) {
-        if (optionPosition === 0 && document.activeElement === list) {
-          newPosition = 0;
-        }
-        list.children[newPosition].focus();
-        select.value = document.activeElement.innerText;
-      }
-      setOptionPosition(newPosition);
-    }
-
     /* When the menu is open */
     if (opened) {
       /* Close menu */
@@ -193,11 +125,35 @@ export default function SelectCover({ options, selectId }) {
         button.focus();
         setOpened(false);
       }
-      if (currentList.length > 0) {
+      if (options.length > 0) {
         /* Select an option */
         if (e.code === 'Enter' || e.code === 'Space') {
           !hasASize && button.focus();
           e.target.classList.contains('option') && selectOption(e);
+        }
+        /* Move up */
+        if (
+          optionPosition >= 1 &&
+          (e.code === 'ArrowUp' || e.code === 'ArrowLeft')
+        ) {
+          let newPosition = optionPosition;
+          do {
+            newPosition--;
+            console.log(options[newPosition - 1]);
+          } while (
+            (options[newPosition].disabled ||
+              options[newPosition].tabIndex === -1) && // When the previous element is an optgroup ...
+            newPosition > 2 // and the current option is at least the third ...
+          );
+          newPosition--;
+          setOptionPosition(newPosition);
+        }
+        /* Move down */
+        if (
+          optionPosition < options.length - 1 &&
+          (e.code === 'ArrowDown' || e.code === 'ArrowRight')
+        ) {
+          setOptionPosition(next);
         }
       }
     }
@@ -211,15 +167,29 @@ export default function SelectCover({ options, selectId }) {
       if ((e.altKey && e.code === 'ArrowDown') || e.code === 'Space') {
         setOpened(true);
       }
+      if (!e.altKey) {
+        /* Select previous option */
+        if (e.code === 'ArrowUp' || e.code === 'ArrowLeft') {
+          if (optionPosition >= 1) {
+            setOptionPosition(prev);
+          }
+        }
+        /* Select next option */
+        if (
+          optionPosition < select.length - 1 &&
+          (e.code === 'ArrowDown' || e.code === 'ArrowRight')
+        ) {
+          setOptionPosition(next);
+        }
+      }
     } /* Select first */
     if (e.code === 'Home' || e.code === 'PageUp') {
       setOptionPosition(0);
     }
     /* Select last */
     if (e.code === 'End' || e.code === 'PageDown') {
-      setOptionPosition(currentList.length - 1);
+      setOptionPosition(options.length - 1);
     }
-    updateValue();
   }
 
   return (
