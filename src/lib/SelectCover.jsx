@@ -3,9 +3,9 @@ import chevron from './angle-down-solid.svg';
 
 export default function SelectCover({ options, selectId }) {
   /* State management */
-  const [opened, setOpened] = useState(false); // Open/close select menu
-  const [currentList, setCurrentList] = useState([]); // Current list
-  const [optionPosition, setOptionPosition] = useState(0); // Option position in the list
+  const [opened, setOpened] = useState(false);
+  const [currentList, setCurrentList] = useState([]);
+  const [optionPosition, setOptionPosition] = useState(0);
 
   /* Original select */
   const select = document.getElementById(selectId);
@@ -19,16 +19,14 @@ export default function SelectCover({ options, selectId }) {
   const option = document.querySelector('.option');
 
   /* Select with a size */
-  const hasASize = selectSize > 0; // Select has a size ?
-  !opened && hasASize && setOpened(true); // Select has a size, list must be open and still open
+  const hasASize = selectSize > 0;
+  !opened && hasASize && setOpened(true);
 
   /* Select disabled */
-  const disabled = document.getElementById(selectId).disabled; // Select disabled ?
+  const disabled = document.getElementById(selectId).disabled;
 
   /* Handles the focus when the menu is open */
   function focusOnOpen() {
-    /* When options were added to the dom and select has no size */
-
     if (hasASize) {
       return;
     }
@@ -37,11 +35,7 @@ export default function SelectCover({ options, selectId }) {
       optionPosition !== -1 &&
       list.children[optionPosition] !== undefined
     ) {
-      const actualPosition = [...list.children].findIndex(
-        (option) => option.innerText === buttonTitle.innerText
-      );
-      list.children[actualPosition].focus(); // Put the focus on the option actually selected (first option on first opening)
-      setOptionPosition(actualPosition);
+      list.children[optionPosition].focus();
       setCurrentList(list.children); // Set the opened list as the current list
     }
   }
@@ -59,13 +53,22 @@ export default function SelectCover({ options, selectId }) {
       return;
     }
     if (
-      buttonTitle &&
       options[optionPosition] &&
       !options[optionPosition].disabled &&
       options[optionPosition].type !== 'optgroup'
     ) {
-      buttonTitle.innerText = options[optionPosition].name;
-      select.value = buttonTitle.innerText;
+      if (buttonTitle) {
+        buttonTitle.innerText = options[optionPosition].name;
+        select.value = buttonTitle.innerText;
+      }
+      if (list && hasASize) {
+        const selectedOption = [...list.children].find((option) =>
+          option.classList.contains('selected')
+        );
+        if (selectedOption) {
+          select.value = selectedOption.innerText;
+        }
+      }
     }
   }
 
@@ -73,24 +76,43 @@ export default function SelectCover({ options, selectId }) {
     [...currentList].forEach((option) => option.classList.add('disabled'));
   }
 
+  const [gotInitialPosition, setGotInitialPosition] = useState(false);
+
   function initialPosition() {
-    if (options[optionPosition] === undefined) {
+    if (buttonTitle === null) {
       return;
     }
-    if (
-      options[optionPosition].type === 'optgroup' ||
-      options[optionPosition].disabled
-    ) {
-      setOptionPosition(optionPosition + 1);
+    if (!gotInitialPosition) {
+      let newPosition = optionPosition;
+      if (
+        (options[newPosition].type === 'optgroup' ||
+          options[newPosition].disabled) &&
+        options[newPosition + 1] !== undefined
+      ) {
+        do {
+          newPosition++;
+        } while (
+          options[newPosition].type === 'optgroup' ||
+          options[newPosition].disabled
+        );
+      }
+      setOptionPosition(newPosition);
+      setGotInitialPosition(true);
     }
   }
 
-  useEffect(() => {
-    initialPosition();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const picSize = (size) => {
+    return size === 's'
+      ? '12px'
+      : size === 'm'
+      ? '16px'
+      : size === 'l'
+      ? '24px'
+      : '16px';
+  };
 
   useEffect(() => {
+    initialPosition();
     updateValue();
     getOptions();
     focusOnOpen();
@@ -105,11 +127,11 @@ export default function SelectCover({ options, selectId }) {
         (option) => e.target.innerText === option.innerText
       )
     );
-    e.target.classList.add('selected'); // Display "selected" style
+    e.target.classList.add('selected');
     [...e.target.parentElement.children].forEach(
       (option) =>
         !(option.className.includes('selected') && option.id === e.target.id) &&
-        option.classList.remove('selected') // Remove "selected" style of the option that is no longer selected
+        option.classList.remove('selected')
     );
   }
 
@@ -119,7 +141,16 @@ export default function SelectCover({ options, selectId }) {
     handleClick === e.target && setOpened(false);
   };
 
+  function goodPosition(newPosition, prevPosition) {
+    console.log(newPosition);
+    options[newPosition].type === 'optgroup' || options[newPosition].disabled
+      ? setOptionPosition(prevPosition)
+      : setOptionPosition(newPosition);
+  }
+
   function keyboardInteraction(e) {
+    let newPosition = optionPosition;
+    let prevPosition = newPosition;
     if (e.target.classList.contains('option') && e.code === 'Tab') {
       selectOption(e);
       return;
@@ -130,22 +161,22 @@ export default function SelectCover({ options, selectId }) {
     e.preventDefault();
     /* Select previous option */
     if (
-      optionPosition >= 1 &&
+      newPosition >= 1 &&
       (e.code === 'ArrowUp' || e.code === 'ArrowLeft') &&
       !e.altKey
     ) {
-      let newPosition = optionPosition;
       do {
-        newPosition > 1 && newPosition--;
+        newPosition >= 1 && newPosition--;
       } while (
+        newPosition >= 1 &&
         (options[newPosition - 1].type === 'optgroup' ||
-          options[newPosition - 1].disabled) && // When the previous element is an optgroup ...
-        newPosition > 1 // and the current option is at least the third ...
+          options[newPosition - 1].disabled)
       );
       (options[newPosition].type === 'optgroup' ||
         options[newPosition].disabled) &&
         newPosition--;
-      setOptionPosition(newPosition);
+      goodPosition(newPosition, prevPosition);
+
       if (list && hasASize) {
         list.children[newPosition].focus();
         select.value = document.activeElement.innerText;
@@ -157,7 +188,6 @@ export default function SelectCover({ options, selectId }) {
       (e.code === 'ArrowDown' || e.code === 'ArrowRight') &&
       !e.altKey
     ) {
-      let newPosition = optionPosition;
       if (
         (options[newPosition + 1].type === 'optgroup' ||
           options[newPosition + 1].disabled) &&
@@ -167,26 +197,50 @@ export default function SelectCover({ options, selectId }) {
           newPosition++;
         } while (
           (options[newPosition].type === 'optgroup' ||
-            options[newPosition].disabled) && // When the previous element is an optgroup ...
-          newPosition < options.length - 2 // and the current option is at least the third ...
+            options[newPosition].disabled) &&
+          newPosition < options.length - 2
         );
       }
       newPosition++;
+      goodPosition(newPosition, prevPosition);
       if (list && hasASize) {
         if (optionPosition === 0 && document.activeElement === list) {
           newPosition = 0;
+          setOptionPosition(newPosition);
         }
         list.children[newPosition].focus();
         select.value = document.activeElement.innerText;
       }
-      setOptionPosition(newPosition);
+    }
+    /* Select first */
+    if (e.code === 'Home' || e.code === 'PageUp') {
+      let newPosition = 0;
+      while (
+        (options[newPosition].type === 'optgroup' ||
+          options[newPosition].disabled) &&
+        newPosition < options.length - 2
+      ) {
+        newPosition++;
+      }
+      goodPosition(newPosition, prevPosition);
+    }
+    /* Select last */
+    if (e.code === 'End' || e.code === 'PageDown') {
+      let newPosition = currentList.length;
+      while (
+        (options[newPosition].type === 'optgroup' ||
+          options[newPosition].disabled) &&
+        newPosition > 1
+      ) {
+        newPosition--;
+      }
+      goodPosition(newPosition, prevPosition);
     }
 
     /* When the menu is open */
     if (opened) {
       /* Close menu */
       if (
-        opened &&
         !hasASize &&
         (e.code === 'Escape' || (e.altKey && e.code === 'ArrowUp'))
       ) {
@@ -211,13 +265,6 @@ export default function SelectCover({ options, selectId }) {
       if ((e.altKey && e.code === 'ArrowDown') || e.code === 'Space') {
         setOpened(true);
       }
-    } /* Select first */
-    if (e.code === 'Home' || e.code === 'PageUp') {
-      setOptionPosition(0);
-    }
-    /* Select last */
-    if (e.code === 'End' || e.code === 'PageDown') {
-      setOptionPosition(currentList.length - 1);
     }
     updateValue();
   }
@@ -282,6 +329,7 @@ export default function SelectCover({ options, selectId }) {
                             alt=""
                             className="option-pic"
                             src={option.props.imgsrc}
+                            width={picSize(option.props.imgsize)}
                           />
                         )}
                         <span className="option-text">
@@ -310,6 +358,7 @@ export default function SelectCover({ options, selectId }) {
                               alt=""
                               className="option-pic"
                               src={option.props.imgsrc}
+                              width={picSize(option.props.imgsize)}
                             />
                           )}
                           <span className="option-text">
@@ -331,7 +380,12 @@ export default function SelectCover({ options, selectId }) {
                   }}
                 >
                   {option.imgsrc && (
-                    <img alt="" className="option-pic" src={option.imgsrc} />
+                    <img
+                      alt=""
+                      className="option-pic"
+                      src={option.imgsrc}
+                      width={picSize(option.imgsize)}
+                    />
                   )}
                   <span className="option-text">{option.name}</span>
                 </li>

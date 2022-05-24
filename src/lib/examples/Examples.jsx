@@ -32,11 +32,15 @@ export default function Examples() {
       </div>
       <div style={styles.div}>
         <SelectMenu selectId="speed" label="Speed">
-          <option imgsrc={testImg} disabled>
+          <option imgsrc={testImg} imgsize="s" disabled>
             Slower
           </option>
-          <option disabled>Slow</option>
-          <option>Medium</option>
+          <option imgsrc={testImg} imgsize="m" disabled>
+            Slow
+          </option>
+          <option imgsrc={testImg} imgsize="l">
+            Medium
+          </option>
           <option disabled>Fast</option>
           <option>Faster</option>
         </SelectMenu>
@@ -45,14 +49,18 @@ export default function Examples() {
         <SelectMenu selectId="files" label="Files">
           <optgroup label="Scripts">
             <option>jQuery.js</option>
-            <option imgsrc={testImg}>ui.jQuery.js</option>
+            <option imgsrc={testImg} imgsize="l">
+              ui.jQuery.js
+            </option>
           </optgroup>
           <optgroup label="Other files">
-            <option disabled>Some unknown file</option>
+            <option imgsrc={testImg} imgsize="s" disabled>
+              Some unknown file
+            </option>
             <option disabled>
               Some other file with a very long option text
             </option>
-            <option>Some other le with a very long option text</option>
+            <option disabled>Some other le with a very long option text</option>
           </optgroup>
         </SelectMenu>
       </div>

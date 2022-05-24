@@ -25,6 +25,15 @@ export default function SelectMenu({
   }
 
   let options = []; // Init options
+  let addOption = (option) =>
+    options.push({
+      name: option.props.children,
+      type: option.type,
+      imgsrc: option.props.imgsrc,
+      imgsize: option.props.imgsize || '16px',
+      disabled: option.props.disabled,
+    });
+
   children.forEach((option) => {
     const optgroup = option.type === 'optgroup'; // Check if it's an optgroup
     if (optgroup) {
@@ -34,21 +43,11 @@ export default function SelectMenu({
       });
       if (option.props.children) {
         option.props.children.forEach((option) => {
-          options.push({
-            name: option.props.children,
-            type: option.type,
-            imgsrc: option.props.imgsrc,
-            disabled: option.props.disabled,
-          });
+          addOption(option);
         });
       }
     } else {
-      options.push({
-        name: option.props.children,
-        type: option.type,
-        imgsrc: option.props.imgsrc,
-        disabled: option.props.disabled,
-      });
+      addOption(option);
     }
   });
 
