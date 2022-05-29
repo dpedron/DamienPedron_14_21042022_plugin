@@ -1,11 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import chevron from './angle-down-solid.svg';
+import './styles.css';
+import PropTypes from 'prop-types';
 
-export default function SelectCover({ options, selectId }) {
+/**
+ * Custom select
+ * @param {array} options Select options
+ * @param {string} selectId Id of the select
+ * @param {string} theme Select theme
+ * @returns {JSX}
+ */
+
+export default function SelectCover({ options, selectId, theme }) {
   /* State management */
   const [opened, setOpened] = useState(false);
   const [currentList, setCurrentList] = useState([]);
   const [optionPosition, setOptionPosition] = useState(0);
+  const [gotInitialPosition, setGotInitialPosition] = useState(false);
 
   /* Original select */
   const select = document.getElementById(selectId);
@@ -25,29 +36,39 @@ export default function SelectCover({ options, selectId }) {
   /* Select disabled */
   const disabled = document.getElementById(selectId).disabled;
 
-  /* Handles the focus when the menu is open */
-  function focusOnOpen() {
-    if (hasASize) {
+  useEffect(() => {
+    initialPosition();
+    updateValue();
+    getOptions();
+    focusOnOpen();
+    hasASize && disabled && disableAllOptions();
+  });
+
+  /* Set the initial position to the first selectable option */
+  function initialPosition() {
+    if (buttonTitle === null) {
       return;
     }
-    if (
-      list &&
-      optionPosition !== -1 &&
-      list.children[optionPosition] !== undefined
-    ) {
-      list.children[optionPosition].focus();
-      setCurrentList(list.children); // Set the opened list as the current list
+    if (!gotInitialPosition) {
+      let newPosition = optionPosition;
+      if (
+        (options[newPosition].type === 'optgroup' ||
+          options[newPosition].disabled) &&
+        options[newPosition + 1] !== undefined
+      ) {
+        do {
+          newPosition++;
+        } while (
+          options[newPosition].type === 'optgroup' ||
+          options[newPosition].disabled
+        );
+      }
+      setOptionPosition(newPosition);
+      setGotInitialPosition(true);
     }
   }
 
-  function getOptions() {
-    const currentList = document.getElementById(`${selectId}-list`);
-    const currentButton = document.getElementById(`${selectId}-button`);
-    opened
-      ? setCurrentList(currentList.children)
-      : setCurrentList(currentButton.previousElementSibling.children);
-  }
-
+  /* Update default select value */
   function updateValue() {
     if (options[optionPosition] === undefined) {
       return;
@@ -72,52 +93,33 @@ export default function SelectCover({ options, selectId }) {
     }
   }
 
+  function getOptions() {
+    const currentList = document.getElementById(`${selectId}-list`);
+    const currentButton = document.getElementById(`${selectId}-button`);
+    opened
+      ? setCurrentList(currentList.children)
+      : setCurrentList(currentButton.previousElementSibling.children);
+  }
+
+  /* Handles the focus when the menu is open */
+  function focusOnOpen() {
+    if (hasASize) {
+      return;
+    }
+    if (
+      list &&
+      optionPosition !== -1 &&
+      list.children[optionPosition] !== undefined
+    ) {
+      list.children[optionPosition].focus();
+      setCurrentList(list.children);
+    }
+  }
+
+  /* Used to disable options when the select has a size */
   function disableAllOptions() {
     [...currentList].forEach((option) => option.classList.add('disabled'));
   }
-
-  const [gotInitialPosition, setGotInitialPosition] = useState(false);
-
-  function initialPosition() {
-    if (buttonTitle === null) {
-      return;
-    }
-    if (!gotInitialPosition) {
-      let newPosition = optionPosition;
-      if (
-        (options[newPosition].type === 'optgroup' ||
-          options[newPosition].disabled) &&
-        options[newPosition + 1] !== undefined
-      ) {
-        do {
-          newPosition++;
-        } while (
-          options[newPosition].type === 'optgroup' ||
-          options[newPosition].disabled
-        );
-      }
-      setOptionPosition(newPosition);
-      setGotInitialPosition(true);
-    }
-  }
-
-  const picSize = (size) => {
-    return size === 's'
-      ? '12px'
-      : size === 'm'
-      ? '16px'
-      : size === 'l'
-      ? '24px'
-      : '16px';
-  };
-
-  useEffect(() => {
-    initialPosition();
-    updateValue();
-    getOptions();
-    focusOnOpen();
-    hasASize && disabled && disableAllOptions();
-  });
 
   /* Handles the selection of an option */
   function selectOption(e) {
@@ -141,13 +143,31 @@ export default function SelectCover({ options, selectId }) {
     handleClick === e.target && setOpened(false);
   };
 
+  /* To define if the current position is a good position or not */
   function goodPosition(newPosition, prevPosition) {
-    console.log(newPosition);
-    options[newPosition].type === 'optgroup' || options[newPosition].disabled
-      ? setOptionPosition(prevPosition)
-      : setOptionPosition(newPosition);
+    if (
+      options[newPosition].type === 'optgroup' ||
+      options[newPosition].disabled
+    ) {
+      setOptionPosition(prevPosition);
+      return prevPosition;
+    } else {
+      setOptionPosition(newPosition);
+      return newPosition;
+    }
   }
 
+  const picSize = (size) => {
+    return size === 's'
+      ? '12px'
+      : size === 'm'
+      ? '16px'
+      : size === 'l'
+      ? '24px'
+      : '16px';
+  };
+
+  /* Handles all keyboard interactions */
   function keyboardInteraction(e) {
     let newPosition = optionPosition;
     let prevPosition = newPosition;
@@ -159,6 +179,7 @@ export default function SelectCover({ options, selectId }) {
       return;
     }
     e.preventDefault();
+
     /* Select previous option */
     if (
       newPosition >= 1 &&
@@ -169,12 +190,9 @@ export default function SelectCover({ options, selectId }) {
         newPosition >= 1 && newPosition--;
       } while (
         newPosition >= 1 &&
-        (options[newPosition - 1].type === 'optgroup' ||
-          options[newPosition - 1].disabled)
+        (options[newPosition].type === 'optgroup' ||
+          options[newPosition].disabled)
       );
-      (options[newPosition].type === 'optgroup' ||
-        options[newPosition].disabled) &&
-        newPosition--;
       goodPosition(newPosition, prevPosition);
 
       if (list && hasASize) {
@@ -182,6 +200,7 @@ export default function SelectCover({ options, selectId }) {
         select.value = document.activeElement.innerText;
       }
     }
+
     /* Select next option */
     if (
       optionPosition < options.length - 1 &&
@@ -212,6 +231,7 @@ export default function SelectCover({ options, selectId }) {
         select.value = document.activeElement.innerText;
       }
     }
+
     /* Select first */
     if (e.code === 'Home' || e.code === 'PageUp') {
       let newPosition = 0;
@@ -223,10 +243,15 @@ export default function SelectCover({ options, selectId }) {
         newPosition++;
       }
       goodPosition(newPosition, prevPosition);
+      if (list && hasASize) {
+        list.children[goodPosition(newPosition, prevPosition)].focus();
+        select.value = document.activeElement.innerText;
+      }
     }
+
     /* Select last */
     if (e.code === 'End' || e.code === 'PageDown') {
-      let newPosition = currentList.length;
+      let newPosition = options.length - 1;
       while (
         (options[newPosition].type === 'optgroup' ||
           options[newPosition].disabled) &&
@@ -235,6 +260,10 @@ export default function SelectCover({ options, selectId }) {
         newPosition--;
       }
       goodPosition(newPosition, prevPosition);
+      if (list && hasASize) {
+        list.children[goodPosition(newPosition, prevPosition)].focus();
+        select.value = document.activeElement.innerText;
+      }
     }
 
     /* When the menu is open */
@@ -274,6 +303,7 @@ export default function SelectCover({ options, selectId }) {
       {!hasASize && ( // Hide the button when a size has been specified for the select
         <div
           className={`select-button ${disabled ? 'disabled' : ''}`}
+          data-theme={theme}
           id={`${selectId}-button`}
           onKeyDown={(e) => {
             keyboardInteraction(e);
@@ -281,11 +311,14 @@ export default function SelectCover({ options, selectId }) {
           onClick={() => setOpened(!opened)}
           tabIndex={disabled ? '-1' : '0'}
         >
-          <span id={`${selectId}-button-title`}>{selectValue}</span>
+          <span data-theme={theme} id={`${selectId}-button-title`}>
+            {selectValue}
+          </span>
           <img
             alt=""
             src={chevron}
             className={`chevron ${disabled ? 'disabled' : ''}`}
+            data-theme={theme}
           />
         </div>
       )}
@@ -300,6 +333,7 @@ export default function SelectCover({ options, selectId }) {
                 option && hasASize && `${selectSize * option.clientHeight}px`,
             }}
             tabIndex={disabled || !hasASize ? '-1' : '0'}
+            data-theme={theme}
             onKeyDown={(e) => {
               keyboardInteraction(e);
             }}
@@ -307,7 +341,11 @@ export default function SelectCover({ options, selectId }) {
             {options.map((option, i) =>
               option.type === 'optgroup' ? ( // Handle optgroup
                 <React.Fragment key={`${option.name}${i}`}>
-                  <li key={`${option.name}`} className="optgroup">
+                  <li
+                    data-theme={theme}
+                    key={`${option.name}`}
+                    className="optgroup"
+                  >
                     {option.name}
                   </li>
                   {option.options !== undefined &&
@@ -318,6 +356,7 @@ export default function SelectCover({ options, selectId }) {
                         className={`option ${
                           option.props.disabled ? 'disabled' : ''
                         }`}
+                        data-theme={theme}
                         onClick={(e) => selectOption(e)}
                         tabIndex={option.props.disabled ? '-1' : '0'}
                         onKeyDown={(e) => {
@@ -332,7 +371,7 @@ export default function SelectCover({ options, selectId }) {
                             width={picSize(option.props.imgsize)}
                           />
                         )}
-                        <span className="option-text">
+                        <span className="option-text" data-theme={theme}>
                           {option.options.props.children}
                         </span>
                       </li>
@@ -344,6 +383,7 @@ export default function SelectCover({ options, selectId }) {
                         <li
                           key={option.props.children}
                           id={`${selectId}-${option.props.children}`}
+                          data-theme={theme}
                           className={`option ${
                             option.props.disabled ? 'disabled' : ''
                           }`}
@@ -361,7 +401,7 @@ export default function SelectCover({ options, selectId }) {
                               width={picSize(option.props.imgsize)}
                             />
                           )}
-                          <span className="option-text">
+                          <span className="option-text" data-theme={theme}>
                             {option.props.children}
                           </span>
                         </li>
@@ -372,6 +412,7 @@ export default function SelectCover({ options, selectId }) {
                 <li
                   key={option.name}
                   id={`${selectId}-${option.name}`}
+                  data-theme={theme}
                   className={`option ${option.disabled ? 'disabled' : ''}`}
                   onClick={(e) => selectOption(e)}
                   tabIndex={option.disabled || hasASize ? '-1' : '0'}
@@ -387,7 +428,9 @@ export default function SelectCover({ options, selectId }) {
                       width={picSize(option.imgsize)}
                     />
                   )}
-                  <span className="option-text">{option.name}</span>
+                  <span className="option-text" data-theme={theme}>
+                    {option.name}
+                  </span>
                 </li>
               )
             )}
@@ -397,3 +440,9 @@ export default function SelectCover({ options, selectId }) {
     </>
   );
 }
+
+SelectCover.propTypes = {
+  options: PropTypes.array,
+  selectId: PropTypes.string.isRequired,
+  theme: PropTypes.string,
+};

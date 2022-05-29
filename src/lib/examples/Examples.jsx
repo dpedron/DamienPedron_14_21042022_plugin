@@ -1,7 +1,6 @@
 import SelectMenu from '../SelectMenu';
 import { states } from './selectOptions';
 import testImg from '../test.png';
-import '../styles.css';
 
 export default function Examples() {
   const styles = {

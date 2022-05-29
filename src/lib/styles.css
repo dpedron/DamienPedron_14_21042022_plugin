@@ -8,36 +8,39 @@
   cursor: pointer;
   display: flex;
   align-items: center;
+  color: var(--text-color);
+  background-color: var(--option-background-color);
 }
 
 .option:hover,
 .option:focus,
 .selected {
-  color: white;
-  background: #007fff;
-  border: 1px solid #003eff;
+  color: var(--active-text-color);
+  background: var(--active-background-color);
 }
 
 .select-button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border: 1px solid #c5c5c5;
+  border: 1px solid var(--border-color);
   padding: 6px 16px;
-  background: #f6f6f6;
+  background: var(--button-background-color);
   border-radius: 3px;
   cursor: pointer;
+  color: var(--text-color);
 }
 
 .chevron {
   height: 15px;
+  filter: var(--chevron-filter);
 }
 
 .list {
   position: relative;
   margin: 0;
   list-style-type: none;
-  border: 1px solid #c5c5c5;
+  border: 1px solid var(--border-color);
   padding-left: 0;
   max-height: 420px;
   overflow-y: auto;
@@ -62,12 +65,11 @@
 
 .disabled {
   pointer-events: none;
-  color: lightgrey;
+  color: var(--disabled-color);
 }
 
 .chevron.disabled {
-  filter: brightness(0) saturate(100%) invert(96%) sepia(0%) saturate(173%)
-    hue-rotate(189deg) brightness(94%) contrast(80%);
+  filter: var(--chevron-filter-disabled);
 }
 
 .handle-click {
@@ -77,4 +79,45 @@
   top: 0;
   left: 0;
   z-index: 9;
+}
+
+/* Themes */
+
+[data-theme='default'] {
+  --button-background-color: white;
+  --border-color: #c5c5c5;
+  --option-background-color: white;
+  --text-color: black;
+  --active-text-color: white;
+  --active-background-color: #007fff;
+  --disabled-color: grey;
+  --chevron-filter-disabled: brightness(0) saturate(100%) invert(96%) sepia(0%)
+    saturate(173%) hue-rotate(189deg) brightness(94%) contrast(80%);
+}
+
+[data-theme='light'] {
+  --button-background-color: #fcfdfe;
+  --border-color: #e9f0f8;
+  --option-background-color: #fcfdfe;
+  --text-color: #afc9e6;
+  --active-text-color: #fcfdfe;
+  --active-background-color: #afc9e6;
+  --disabled-color: #ededed;
+  --chevron-filter: brightness(0) saturate(100%) invert(84%) sepia(11%)
+    saturate(668%) hue-rotate(174deg) brightness(92%) contrast(97%);
+  --chevron-filter-disabled: brightness(0) saturate(100%) invert(97%) sepia(3%)
+    saturate(821%) hue-rotate(213deg) brightness(114%) contrast(86%);
+}
+
+[data-theme='dark'] {
+  --button-background-color: black;
+  --border-color: grey;
+  --option-background-color: #212a2e;
+  --text-color: lightgrey;
+  --active-text-color: white;
+  --active-background-color: grey;
+  --disabled-color: grey;
+  --chevron-filter: brightness(0) saturate(100%) invert(92%) sepia(2%)
+    saturate(14%) hue-rotate(85deg) brightness(96%) contrast(85%);
+  --chevron-filter-disabled: brightness(0) saturate(100%) invert(57%) sepia(0%);
 }
