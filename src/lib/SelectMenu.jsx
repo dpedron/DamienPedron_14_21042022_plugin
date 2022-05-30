@@ -4,28 +4,15 @@ import PropTypes from 'prop-types';
 
 /**
  * Replace the original select by the custom select
- * @param {string} selectId Id of the select
  * @param {array} children Select options
- * @param {string} label Select label
- * @param {number} size Select size
- * @param {boolean} disabled Define if the select is disabled or not
  * @param {string} theme Select theme
  * @returns {JSX}
  */
 
-export default function SelectMenu({
-  selectId,
-  children = [
-    <option key={`${selectId}-no-option`} disabled>
-      No option
-    </option>,
-  ],
-  label,
-  size = 0,
-  disabled = false,
-  theme = 'default',
-}) {
+export default function SelectMenu({ children, theme = 'default' }) {
   const [selectHide, setSelectHide] = useState(false);
+
+  const selectId = children.props.id;
 
   useEffect(() => {
     changeSelect();
@@ -43,36 +30,53 @@ export default function SelectMenu({
     options.push({
       name: option.props.children,
       type: option.type,
+      value: option.props.value,
       imgsrc: option.props.imgsrc,
       imgsize: option.props.imgsize || '16px',
       disabled: option.props.disabled,
     });
 
-  children.forEach((option) => {
-    const optgroup = option.type === 'optgroup';
-    if (optgroup) {
-      options.push({
-        name: option.props.label,
-        type: option.type,
-      });
-      if (option.props.children) {
-        option.props.children.forEach((option) => {
-          addOption(option);
-        });
-      }
+  // No option
+  if (children.props.children === undefined) {
+    options.push({
+      name: 'no-option',
+      type: 'option',
+      disabled: true,
+    });
+  } else {
+    // One option
+    if (children.props.children.length === undefined) {
+      addOption(children.props.children);
     } else {
-      addOption(option);
+      // Multiple options
+      children.props.children.forEach((option) => {
+        const optgroup = option.type === 'optgroup';
+        if (optgroup) {
+          options.push({
+            name: option.props.label,
+            type: option.type,
+          });
+          if (option.props.children) {
+            option.props.children.forEach((option) => {
+              addOption(option);
+            });
+          }
+        } else {
+          if (option.length === undefined) {
+            addOption(option);
+          } else {
+            option.forEach((option) => {
+              addOption(option);
+            });
+          }
+        }
+      });
     }
-  });
+  }
 
   return (
     <>
-      <label className="label" htmlFor={`${selectId}-button`}>
-        {label}
-      </label>
-      <select id={selectId} name={selectId} size={size} disabled={disabled}>
-        {children}
-      </select>
+      {children}
       {selectHide && (
         <SelectCover options={options} selectId={selectId} theme={theme} />
       )}
@@ -81,10 +85,6 @@ export default function SelectMenu({
 }
 
 SelectMenu.propTypes = {
-  selectId: PropTypes.string.isRequired,
-  children: PropTypes.array,
-  label: PropTypes.string,
-  size: PropTypes.number,
-  disabled: PropTypes.bool,
+  children: PropTypes.object,
   theme: PropTypes.string,
 };

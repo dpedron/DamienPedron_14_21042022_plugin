@@ -1,6 +1,23 @@
+:root {
+  --background-color: white;
+  --border-color: #c5c5c5;
+  --text-color: black;
+  --active-text-color: white;
+  --active-background-color: #007fff;
+  --disabled-color: grey;
+  --chevron-filter-disabled: brightness(0) saturate(100%) invert(96%) sepia(0%)
+    saturate(173%) hue-rotate(189deg) brightness(94%) contrast(80%);
+}
+
+.select-wrapper {
+  position: relative;
+}
+
 .optgroup {
   font-weight: bold;
   padding: 5px;
+  color: var(--text-color);
+  background-color: var(--background-color);
 }
 
 .option {
@@ -9,7 +26,7 @@
   display: flex;
   align-items: center;
   color: var(--text-color);
-  background-color: var(--option-background-color);
+  background-color: var(--background-color);
 }
 
 .option:hover,
@@ -25,7 +42,7 @@
   justify-content: space-between;
   border: 1px solid var(--border-color);
   padding: 6px 16px;
-  background: var(--button-background-color);
+  background: var(--background-color);
   border-radius: 3px;
   cursor: pointer;
   color: var(--text-color);
@@ -37,7 +54,8 @@
 }
 
 .list {
-  position: relative;
+  width: 100%;
+  position: absolute;
   margin: 0;
   list-style-type: none;
   border: 1px solid var(--border-color);
@@ -51,7 +69,8 @@
 }
 
 .label {
-  margin: 16px 0 10px 0;
+  margin: 16px 0 0 0;
+  padding: 0;
 }
 
 .option-pic {
@@ -83,22 +102,9 @@
 
 /* Themes */
 
-[data-theme='default'] {
-  --button-background-color: white;
-  --border-color: #c5c5c5;
-  --option-background-color: white;
-  --text-color: black;
-  --active-text-color: white;
-  --active-background-color: #007fff;
-  --disabled-color: grey;
-  --chevron-filter-disabled: brightness(0) saturate(100%) invert(96%) sepia(0%)
-    saturate(173%) hue-rotate(189deg) brightness(94%) contrast(80%);
-}
-
 [data-theme='light'] {
-  --button-background-color: #fcfdfe;
+  --background-color: #fcfdfe;
   --border-color: #e9f0f8;
-  --option-background-color: #fcfdfe;
   --text-color: #afc9e6;
   --active-text-color: #fcfdfe;
   --active-background-color: #afc9e6;
@@ -110,9 +116,8 @@
 }
 
 [data-theme='dark'] {
-  --button-background-color: black;
+  --background-color: #212a2e;
   --border-color: grey;
-  --option-background-color: #212a2e;
   --text-color: lightgrey;
   --active-text-color: white;
   --active-background-color: grey;

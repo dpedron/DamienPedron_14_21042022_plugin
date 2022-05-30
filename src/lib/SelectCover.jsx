@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import chevron from './angle-down-solid.svg';
+import chevron from './chevron.svg';
 import './styles.css';
 import PropTypes from 'prop-types';
 
@@ -16,7 +16,6 @@ export default function SelectCover({ options, selectId, theme }) {
   const [opened, setOpened] = useState(false);
   const [currentList, setCurrentList] = useState([]);
   const [optionPosition, setOptionPosition] = useState(0);
-  const [gotInitialPosition, setGotInitialPosition] = useState(false);
 
   /* Original select */
   const select = document.getElementById(selectId);
@@ -28,6 +27,8 @@ export default function SelectCover({ options, selectId, theme }) {
   const button = document.getElementById(`${selectId}-button`);
   const buttonTitle = document.getElementById(`${selectId}-button-title`);
   const option = document.querySelector('.option');
+  const emptyValue = options.find((option) => option.value === '');
+  const emptyValueIndex = options.findIndex((option) => option.value === '');
 
   /* Select with a size */
   const hasASize = selectSize > 0;
@@ -37,7 +38,7 @@ export default function SelectCover({ options, selectId, theme }) {
   const disabled = document.getElementById(selectId).disabled;
 
   useEffect(() => {
-    initialPosition();
+    position();
     updateValue();
     getOptions();
     focusOnOpen();
@@ -45,12 +46,14 @@ export default function SelectCover({ options, selectId, theme }) {
   });
 
   /* Set the initial position to the first selectable option */
-  function initialPosition() {
+  function position() {
     if (buttonTitle === null) {
       return;
     }
-    if (!gotInitialPosition) {
-      let newPosition = optionPosition;
+    let newPosition = optionPosition;
+    if (emptyValue && !opened) {
+      newPosition = emptyValueIndex;
+    } else {
       if (
         (options[newPosition].type === 'optgroup' ||
           options[newPosition].disabled) &&
@@ -64,7 +67,6 @@ export default function SelectCover({ options, selectId, theme }) {
         );
       }
       setOptionPosition(newPosition);
-      setGotInitialPosition(true);
     }
   }
 
@@ -75,7 +77,7 @@ export default function SelectCover({ options, selectId, theme }) {
     }
     if (
       options[optionPosition] &&
-      !options[optionPosition].disabled &&
+      (!options[optionPosition].disabled || emptyValue) &&
       options[optionPosition].type !== 'optgroup'
     ) {
       if (buttonTitle) {
@@ -98,7 +100,9 @@ export default function SelectCover({ options, selectId, theme }) {
     const currentButton = document.getElementById(`${selectId}-button`);
     opened
       ? setCurrentList(currentList.children)
-      : setCurrentList(currentButton.previousElementSibling.children);
+      : setCurrentList(
+          currentButton.parentElement.previousElementSibling.children
+        );
   }
 
   /* Handles the focus when the menu is open */
@@ -207,20 +211,13 @@ export default function SelectCover({ options, selectId, theme }) {
       (e.code === 'ArrowDown' || e.code === 'ArrowRight') &&
       !e.altKey
     ) {
-      if (
-        (options[newPosition + 1].type === 'optgroup' ||
-          options[newPosition + 1].disabled) &&
+      do {
+        newPosition++;
+      } while (
+        (options[newPosition].type === 'optgroup' ||
+          options[newPosition].disabled) &&
         newPosition < options.length - 2
-      ) {
-        do {
-          newPosition++;
-        } while (
-          (options[newPosition].type === 'optgroup' ||
-            options[newPosition].disabled) &&
-          newPosition < options.length - 2
-        );
-      }
-      newPosition++;
+      );
       goodPosition(newPosition, prevPosition);
       if (list && hasASize) {
         if (optionPosition === 0 && document.activeElement === list) {
@@ -299,7 +296,7 @@ export default function SelectCover({ options, selectId, theme }) {
   }
 
   return (
-    <>
+    <div className="select-wrapper">
       {!hasASize && ( // Hide the button when a size has been specified for the select
         <div
           className={`select-button ${disabled ? 'disabled' : ''}`}
@@ -437,7 +434,7 @@ export default function SelectCover({ options, selectId, theme }) {
           </ul>
         </>
       )}
-    </>
+    </div>
   );
 }
 
