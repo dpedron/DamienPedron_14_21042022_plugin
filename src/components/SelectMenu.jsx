@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import SelectCover from './SelectCover';
+import SelectCover from './SelectCover.jsx';
 import PropTypes from 'prop-types';
 
 /**

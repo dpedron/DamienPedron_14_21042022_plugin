@@ -1,6 +1,6 @@
 :root {
   --background-color: white;
-  --border-color: #c5c5c5;
+  --border-color: #ced4da;
   --text-color: black;
   --active-text-color: white;
   --active-background-color: #007fff;
@@ -11,6 +11,7 @@
 
 .select-wrapper {
   position: relative;
+  padding: 0;
 }
 
 .optgroup {
@@ -43,7 +44,7 @@
   border: 1px solid var(--border-color);
   padding: 6px 16px;
   background: var(--background-color);
-  border-radius: 3px;
+  border-radius: 0.25rem;
   cursor: pointer;
   color: var(--text-color);
 }

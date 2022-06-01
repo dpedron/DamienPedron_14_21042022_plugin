@@ -1,1 +1,1 @@
-export * from './lib/SelectMenu';
+export * from './components/SelectMenu.jsx'

@@ -2,18 +2,27 @@
 
 SelectMenu transforms the default `<select>` element into a customizable control. The original `<select>` element's state is maintained for form submission.
 
-To use it you need to wrap your `<select>` (**with an id**) with `<option>`/`<optgroup>` elements in the `<SelectMenu>` component.
-
 # Installation
+
+Launch `yarn add select-menu--p14` command
+
+To use it you need to :
+
+- `import SelectMenu from 'select-menu--p14';`
+- Wrap your `<select>` (**with an id**) and `<option>`/`<optgroup>` elements in the `<SelectMenu>` component.
 
 # Example
 
-`<SelectMenu selectId="example" label="Example" size={5} theme="dark" disabled>`
-&emsp;&emsp;`<optgroup label="Optgroup">`
-&emsp;&emsp;&emsp;&emsp;`<option disabled>Option 1</option>`
-&emsp;&emsp;&emsp;&emsp;`<option imgsrc={logo} imgsize="s">option 2</option>`
-&emsp;&emsp;`</optgroup>`
-`</SelectMenu>`
+```
+import  SelectMenu  from  'select-menu--p14';
+
+<SelectMenu theme="dark">
+	<optgroup label="Optgroup">
+		<option disabled>Option 1</option>
+		<option imgsrc={logo} imgsize="s">option 2</option>
+	</optgroup>
+</SelectMenu>
+```
 
 `<select>` and `<option>` can be disabled by adding a disabled attribute
 

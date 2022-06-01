@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import chevron from './chevron.svg';
 import './styles.css';
 import PropTypes from 'prop-types';
 
@@ -51,7 +50,7 @@ export default function SelectCover({ options, selectId, theme }) {
       return;
     }
     let newPosition = optionPosition;
-    if (emptyValue && !opened) {
+    if (emptyValue) {
       newPosition = emptyValueIndex;
     } else {
       if (
@@ -83,6 +82,8 @@ export default function SelectCover({ options, selectId, theme }) {
       if (buttonTitle) {
         buttonTitle.innerText = options[optionPosition].name;
         select.value = buttonTitle.innerText;
+        select.value !== '' &&
+          select.dispatchEvent(new Event('change', { bubbles: true }));
       }
       if (list && hasASize) {
         const selectedOption = [...list.children].find((option) =>
@@ -90,6 +91,8 @@ export default function SelectCover({ options, selectId, theme }) {
         );
         if (selectedOption) {
           select.value = selectedOption.innerText;
+          select.value !== '' &&
+            select.dispatchEvent(new Event('change', { bubbles: true }));
         }
       }
     }
@@ -107,7 +110,7 @@ export default function SelectCover({ options, selectId, theme }) {
 
   /* Handles the focus when the menu is open */
   function focusOnOpen() {
-    if (hasASize) {
+    if (hasASize || select.value === '') {
       return;
     }
     if (
@@ -311,12 +314,14 @@ export default function SelectCover({ options, selectId, theme }) {
           <span data-theme={theme} id={`${selectId}-button-title`}>
             {selectValue}
           </span>
-          <img
-            alt=""
-            src={chevron}
+          <svg
             className={`chevron ${disabled ? 'disabled' : ''}`}
             data-theme={theme}
-          />
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 384 512"
+          >
+            <path d="M192 384c-8.188 0-16.38-3.125-22.62-9.375l-160-160c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0L192 306.8l137.4-137.4c12.5-12.5 32.75-12.5 45.25 0s12.5 32.75 0 45.25l-160 160C208.4 380.9 200.2 384 192 384z" />
+          </svg>
         </div>
       )}
       {opened && (
@@ -348,6 +353,10 @@ export default function SelectCover({ options, selectId, theme }) {
                   {option.options !== undefined &&
                     option.options.type === 'option' && ( // Only one option in optgroup
                       <li
+                        style={{
+                          display:
+                            option.props.value === '' ? 'none' : 'list-item',
+                        }}
                         key={option.options.props.children}
                         id={`${selectId}-${option.options.props.children}`}
                         className={`option ${
@@ -378,6 +387,10 @@ export default function SelectCover({ options, selectId, theme }) {
                     option.options.map((option) => {
                       return (
                         <li
+                          style={{
+                            display:
+                              option.props.value === '' ? 'none' : 'list-item',
+                          }}
                           key={option.props.children}
                           id={`${selectId}-${option.props.children}`}
                           data-theme={theme}
@@ -407,6 +420,9 @@ export default function SelectCover({ options, selectId, theme }) {
                 </React.Fragment>
               ) : (
                 <li
+                  style={{
+                    display: option.value === '' ? 'none' : 'list-item',
+                  }}
                   key={option.name}
                   id={`${selectId}-${option.name}`}
                   data-theme={theme}
